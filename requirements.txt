@@ -1,0 +1,4 @@
+dbt-duckdb==1.9.1
+duckdb
+pyyaml
+pytest

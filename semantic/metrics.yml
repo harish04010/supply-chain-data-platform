@@ -1,0 +1,47 @@
+# Governed metric definitions: the single source of truth for every number the
+# dashboard, the conversational assistant and any downstream report shows.
+# Each metric names the certified model it comes from, how it aggregates, and an owner.
+metrics:
+  - name: instock_rate
+    label: In-stock rate
+    model: mart_instock_weekly
+    expression: avg(instock_rate)
+    format: percent
+    grain: week x region x category
+    owner: Inventory Planning
+    definition: Share of store x SKU x days with on-hand above zero.
+  - name: otif_rate
+    label: Vendor on-time in-full
+    model: mart_vendor_scorecard
+    expression: sum(otif_rate * received_lines) / sum(received_lines)
+    format: percent
+    grain: vendor
+    owner: Supplier Management
+    definition: Received PO lines that arrived by the promised date with the full ordered quantity.
+  - name: fill_rate
+    label: Vendor fill rate
+    model: mart_vendor_scorecard
+    expression: sum(fill_rate * received_lines) / sum(received_lines)
+    format: percent
+    grain: vendor
+    owner: Supplier Management
+    definition: Units received divided by units ordered, on received lines.
+  - name: weeks_of_supply
+    label: Weeks of supply
+    model: mart_weeks_of_supply
+    # The mart has a DC row and a store row per category, each carrying the same weekly sales rate.
+    # Summing weekly_units over both rows double-counts sales and halves weeks of supply (caught by
+    # the dashboard's validation check: 4.3 certified vs 8.6 recomputed). Count the rate once.
+    expression: sum(on_hand) / sum(case when location_type = 'Store' then weekly_units end)
+    format: number
+    grain: category x location type, latest snapshot
+    owner: Inventory Planning
+    definition: On hand divided by average weekly sales over the trailing four weeks.
+  - name: sell_through
+    label: Sell-through
+    model: mart_sell_through_weekly
+    expression: sum(units_sold) / (sum(units_sold) + sum(ending_on_hand))
+    format: percent
+    grain: week x category
+    owner: Merchandising
+    definition: Units sold in the week divided by units sold plus store on-hand at week end.

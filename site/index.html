@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Supply chain data platform: certified metrics</title>
+<meta name="description" content="A dbt-built supply chain data platform: source-to-target reconciliation, governed metrics, vendor performance, in-stock and conversational analytics validated against certified numbers.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4f6f8;--surface:#fff;--ink:#121820;--soft:#5a6472;--rule:#dde2e8;--accent:#0b5cad;--good:#22804f;--warn:#b7791f;--bad:#c0392b;--chip:#eaeef3;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--paper:#0f141a;--surface:#161d26;--ink:#e7ecf2;--soft:#9ca7b5;--rule:#28313d;--accent:#78b4f0;--good:#5cc28f;--warn:#e3b04f;--bad:#ef8577;--chip:#1f2732;color-scheme:dark}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,"Helvetica Neue",Arial,sans-serif}
+.hr-bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px clamp(14px,3vw,32px);font:500 13px/1.4 -apple-system,"Segoe UI",Inter,Arial,sans-serif;background:#f1f2f4;color:#3b4250;border-bottom:1px solid #dfe2e7}
+.hr-bar a{color:inherit;text-decoration:none}.hr-bar a:hover{text-decoration:underline}
+@media (prefers-color-scheme:dark){.hr-bar{background:#171b21;color:#b4bcc8;border-bottom-color:#2a313b}}
+main{max-width:1160px;margin:0 auto;padding:36px clamp(16px,3vw,36px) 64px}
+h1,h2{font-family:Manrope,Inter,sans-serif;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4.4vw,2.8rem);line-height:1.08;margin:6px 0 10px;font-weight:800}
+h2{font-size:1.35rem;margin:0 0 8px;font-weight:700}
+.soft{color:var(--soft)}.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.88em}
+.lede{max-width:72ch;color:var(--soft);font-size:1.08rem;margin:0}
+section{margin-top:40px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:22px}
+.kpi{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px}
+.kpi b{display:block;font:800 1.7rem Manrope,sans-serif}.kpi span{color:var(--soft);font-size:.84rem}
+.cert{display:inline-block;font-size:.72rem;font-weight:600;color:var(--good);border:1px solid var(--good);border-radius:4px;padding:0 6px;margin-left:6px;vertical-align:2px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:880px){.grid2{grid-template-columns:1fr}}
+.ask{display:flex;gap:8px;flex-wrap:wrap}
+.ask input{flex:1;min-width:240px;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink)}
+.ask button,.sugg button{font:inherit;font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer}
+.ask button.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.sugg button{font-size:.84rem;padding:5px 10px;border-radius:999px;font-weight:500}
+.answer{margin-top:14px;border-left:4px solid var(--accent);padding:10px 14px;background:var(--paper);border-radius:0 8px 8px 0}
+.answer .val{font:800 1.5rem Manrope,sans-serif}
+.answer pre{margin:8px 0 0;white-space:pre-wrap;font:500 .8rem "JetBrains Mono",monospace;color:var(--soft)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.92rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:.78rem;color:var(--soft);font-weight:600}
+td.bad{color:var(--bad);font-weight:700}td.warn{color:var(--warn);font-weight:700}
+svg{width:100%;height:auto;display:block}
+.axis{fill:var(--soft);font-size:11px;font-family:inherit}
+.legend{display:flex;gap:14px;font-size:.84rem;color:var(--soft);flex-wrap:wrap;margin-top:4px}
+.sw{display:inline-block;width:12px;height:3px;vertical-align:3px;margin-right:5px}
+.incident{border-left:5px solid var(--warn)}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.stat div{background:var(--paper);border-radius:8px;padding:10px}.stat b{display:block;font:800 1.3rem Manrope,sans-serif}
+.tests{columns:2;column-gap:20px;font-size:.86rem}
+@media (max-width:700px){.tests{columns:1}}
+.tests div{break-inside:avoid;padding:3px 0;display:flex;gap:8px;min-width:0}
+.tests .mono{overflow-wrap:anywhere}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none}
+.foot{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-size:.88rem;color:var(--soft)}
+</style>
+</head>
+<body>
+<nav class="hr-bar" aria-label="Portfolio"><a href="https://harish04010-portfolio.vercel.app">&larr; Harish Gopu's portfolio</a><a href="https://github.com/harish04010/supply-chain-data-platform">View the code on GitHub &rarr;</a></nav>
+<main>
+<p class="soft" style="margin:0;font-weight:600">Analytics engineering · dbt + DuckDB · Ridgeline Outfitters (case study)</p>
+<h1>One version of the supply chain numbers</h1>
+<p class="lede">Purchase orders, vendor ship notices, distribution-center receipts, store shipments, sales and a million-event inventory stream, modeled in dbt into a star schema and certified metrics. Every number below comes from a governed definition, and the pipeline proves its own inputs before anyone sees them.</p>
+<div class="kpis" id="kpis"></div>
+
+<section class="card"><h2>Ask the data</h2>
+<p class="soft" style="margin:0 0 12px">Questions are answered only from the governed metric definitions, never from free-form SQL. Each answer shows the definition it used and is checked against the certified value before it's displayed.</p>
+<div class="ask"><input id="q" placeholder="e.g. Which vendor has the worst on-time in-full?" aria-label="Question"><button class="go" id="go">Ask</button></div>
+<div class="sugg" id="sugg"></div><div id="answer"></div></section>
+
+<section class="card"><h2>Vendor performance, connected to the shelf</h2>
+<p class="soft" style="margin:0 0 10px">On-time in-full and fill rate from PO lines joined to receipts; ASN accuracy from what vendors said they shipped versus what arrived; in-stock from inventory of each vendor's SKUs. Stores are buffered by DC stock, so a vendor's problems show up at the DC first: V07 stocks out at the DCs several times more often than anyone else while its store in-stock still looks fine.</p>
+<div class="scroll"><table id="vendors"></table></div></section>
+
+<section class="grid2">
+  <div class="card"><h2>Store in-stock by week</h2><svg id="instock" viewBox="0 0 520 230"></svg><div class="legend" id="instockLegend"></div></div>
+  <div class="card"><h2>Weeks of supply</h2><p class="soft" style="margin:0 0 6px">At the latest snapshot: on hand ÷ trailing 4-week sales.</p><svg id="wos" viewBox="0 0 520 230"></svg></div>
+</section>
+
+<section class="card incident"><h2>Incident: the snapshot feed loaded one day twice</h2>
+<p style="margin:0" id="incidentText"></p><div class="stat" id="incidentStats"></div>
+<p class="soft" style="margin:12px 0 0"><b>Root cause:</b> the warehouse snapshot extract for DC1 on May 12 was delivered twice. <b>Fix:</b> staging keeps one row per date, location and SKU. <b>Prevention:</b> a source-level audit warns on any repeat load, and the reconciliation test fails the build if snapshots and events ever disagree again.</p></section>
+
+<section class="grid2">
+  <div class="card"><h2>Lineage</h2><p class="soft" style="margin:0 0 6px">Every model and what it's built from, read from dbt's manifest.</p><svg id="lineage" viewBox="0 0 520 360"></svg></div>
+  <div class="card"><h2>Data tests on the last build</h2><p class="soft" style="margin:0 0 8px" id="testSummary"></p><div class="tests" id="tests"></div></div>
+</section>
+
+<section class="card"><h2>Metric catalog</h2><p class="soft" style="margin:0 0 8px">From <span class="mono">semantic/metrics.yml</span>: one definition per metric, with its source model and owner.</p><div class="scroll"><table id="catalog"></table></div></section>
+
+<footer class="foot">Data is generated for this case study: a fictional retailer with 2 DCs, 40 stores, 240 SKUs and 12 vendors over 26 weeks, with known problems planted so the tests can prove they're caught. Code, dbt models, tests and the generator are in the repository.</footer>
+</main>
+<script type="module">
+const d = await fetch("data.json").then(r => r.json());
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct = (v, dp = 1) => (v * 100).toFixed(dp) + "%";
+const fmt = (m, v) => m.format === "percent" ? pct(v) : v.toFixed(1);
+const M = Object.fromEntries(d.metrics.map(m => [m.name, m]));
+
+document.getElementById("kpis").innerHTML = d.metrics.map(m => `<div class="kpi" title="${esc(m.definition)}"><span>${esc(m.label)}<span class="cert">certified</span></span><b>${fmt(m, d.certified[m.name])}</b><span>owner: ${esc(m.owner)}</span></div>`).join("");
+
+// ---- the governed "semantic layer" in the browser: each metric's aggregation over its certified mart
+const agg = {
+  instock_rate: rows => rows.reduce((s, r) => s + r.v, 0) / rows.length,
+  otif_rate: rows => rows.reduce((s, r) => s + r.otif_rate * r.received_lines, 0) / rows.reduce((s, r) => s + r.received_lines, 0),
+  fill_rate: rows => rows.reduce((s, r) => s + r.fill_rate * r.received_lines, 0) / rows.reduce((s, r) => s + r.received_lines, 0),
+  weeks_of_supply: rows => rows.reduce((s, r) => s + r.on_hand, 0) / rows.reduce((s, r) => s + r.weekly_units, 0),
+  sell_through: rows => { const s = rows.reduce((a, r) => a + r.sold, 0), e = rows.reduce((a, r) => a + r.end, 0); return s / (s + e); },
+};
+const src = { instock_rate: d.instock_weekly, otif_rate: d.vendors, fill_rate: d.vendors, sell_through: d.sell_through,
+  weeks_of_supply: Object.values(d.wos.reduce((a, r) => { const k = r.category; a[k] = a[k] || { category: k, on_hand: 0, weekly_units: 0 }; a[k].on_hand += r.on_hand; a[k].weekly_units = r.weekly_units; return a; }, {})) };
+const dims = { instock_rate: ["region", "category"], otif_rate: ["vendor_name"], fill_rate: ["vendor_name"], weeks_of_supply: ["category"], sell_through: ["category"] };
+const words = { instock_rate: ["in-stock", "instock", "in stock", "out of stock", "availability"], otif_rate: ["otif", "on-time", "on time", "late"], fill_rate: ["fill rate", "short", "fill"],
+  weeks_of_supply: ["weeks of supply", "wos", "cover", "how much inventory"], sell_through: ["sell-through", "sell through", "selling"] };
+const dimWords = { region: ["region"], category: ["category", "categories"], vendor_name: ["vendor", "supplier"] };
+
+function answer(q) {
+  const t = q.toLowerCase();
+  const metric = Object.keys(words).find(k => words[k].some(w => t.includes(w)));
+  if (!metric) return `<div class="answer">I can only answer from certified metrics: ${d.metrics.map(m => m.label.toLowerCase()).join(", ")}. Try one of the suggestions.</div>`;
+  const m = M[metric], rows = src[metric];
+  let dim = dims[metric].find(k => dimWords[k].some(w => t.includes(w)));
+  if (!dim && /which|worst|best|lowest|highest/.test(t)) dim = dims[metric][dims[metric].length - 1];
+  // Rows are exported at 4 decimals, so re-aggregating them can drift by a hair; the tolerance matches that precision.
+  const tol = m.format === "percent" ? 0.0005 : 0.01;
+  const total = agg[metric](rows), ok = Math.abs(total - d.certified[metric]) <= tol;
+  const check = `<p style="margin:8px 0 0;font-weight:600;color:${ok ? "var(--good)" : "var(--bad)"}">${ok ? "✓" : "✗"} Overall ${m.label.toLowerCase()} recomputed here = ${fmt(m, total)}; certified value = ${fmt(m, d.certified[metric])}.${ok ? ` Matches (within ${m.format === "percent" ? "0.05 points" : "0.01"}, the export precision).` : " Mismatch: answer withheld."}</p>`;
+  if (!ok) return `<div class="answer">${check}</div>`;
+  let body = `<span class="soft">${esc(m.label)}, overall</span><div class="val">${fmt(m, total)}</div>`;
+  if (dim) {
+    const groups = {}; rows.forEach(r => (groups[r[dim]] = groups[r[dim]] || []).push(r));
+    const ranked = Object.entries(groups).map(([k, g]) => [k, agg[metric](g)]).sort((a, b) => a[1] - b[1]);
+    const lowWorse = metric !== "weeks_of_supply";
+    const pick = /best|highest|most/.test(t) ? ranked.at(-1) : ranked[0];
+    body = `<span class="soft">${esc(m.label)} by ${dim.replace("_name", "")}</span><div class="val">${esc(pick[0])}: ${fmt(m, pick[1])}</div><p class="soft" style="margin:4px 0 0">${ranked.map(([k, v]) => `${esc(k)} ${fmt(m, v)}`).join(" · ")}</p>`;
+  }
+  return `<div class="answer">${body}<pre>metric: ${m.name}\nsource: ${m.model}\nexpression: ${m.expression}${dim ? `\ngroup by: ${dim}` : ""}\nowner: ${m.owner}</pre>${check}</div>`;
+}
+const qs = ["Which vendor has the worst on-time in-full?", "What's our in-stock rate by region?", "Which category has the lowest sell-through?", "Weeks of supply by category", "Which supplier has the lowest fill rate?", "What's the weather tomorrow?"];
+document.getElementById("sugg").innerHTML = qs.map(q => `<button>${esc(q)}</button>`).join("");
+document.querySelectorAll("#sugg button").forEach(b => b.onclick = () => { document.getElementById("q").value = b.textContent; run(); });
+const run = () => document.getElementById("answer").innerHTML = answer(document.getElementById("q").value);
+document.getElementById("go").onclick = run; document.getElementById("q").onkeydown = e => { if (e.key === "Enter") run(); };
+
+document.getElementById("vendors").innerHTML = `<thead><tr><th>Vendor</th><th>PO lines</th><th>On-time in-full</th><th>Fill rate</th><th>Avg days late</th><th>ASN mismatch</th><th>DC in-stock</th><th>Store in-stock</th></tr></thead><tbody>` +
+  d.vendors.map(v => `<tr><td><b>${esc(v.vendor_id)}</b> ${esc(v.vendor_name)}</td><td>${v.po_lines}</td><td class="${v.otif_rate < 0.5 ? "bad" : ""}">${pct(v.otif_rate)}</td><td class="${v.fill_rate < 0.95 ? "bad" : ""}">${pct(v.fill_rate)}</td><td>${v.avg_days_late.toFixed(1)}</td><td class="${v.asn_mismatch_rate > 0.1 ? "warn" : ""}">${pct(v.asn_mismatch_rate)}</td><td class="${v.dc_instock_rate === Math.min(...d.vendors.map(x => x.dc_instock_rate)) ? "bad" : ""}">${pct(v.dc_instock_rate, 2)}</td><td>${pct(v.instock_rate, 2)}</td></tr>`).join("") + "</tbody>";
+
+(() => { const weeks = [...new Set(d.instock_weekly.map(r => r.w))].sort(), regions = ["East", "Central"], col = { East: "var(--accent)", Central: "var(--warn)" };
+  const W = 520, H = 230, L = 44, R = 8, T = 10, B = 26, vals = d.instock_weekly.map(r => r.v), lo = Math.floor(Math.min(...vals) * 100 - 0.5) / 100, hi = 1;
+  const x = i => L + (W - L - R) * i / (weeks.length - 1), y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
+  let o = [lo, (lo + hi) / 2, hi].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text class="axis" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${pct(v, 1)}</text>`).join("");
+  regions.forEach(rg => { const pts = weeks.map(w => { const g = d.instock_weekly.filter(r => r.w === w && r.region === rg); return g.reduce((s, r) => s + r.v, 0) / g.length; });
+    o += `<path d="${pts.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join("")}" fill="none" stroke="${col[rg]}" stroke-width="2.4"/>`; });
+  [0, 8, 16, 25].forEach(i => weeks[i] && (o += `<text class="axis" x="${x(i)}" y="${H - 8}" text-anchor="middle">${weeks[i].slice(5)}</text>`));
+  document.getElementById("instock").innerHTML = o;
+  document.getElementById("instockLegend").innerHTML = regions.map(r => `<span><i class="sw" style="background:${col[r]}"></i>${r} stores</span>`).join("") + `<span>axis starts at ${pct(lo, 0)}</span>`; })();
+
+(() => { const cats = [...new Set(d.wos.map(r => r.category))], W = 520, H = 230, L = 40, R = 8, T = 14, B = 34, max = Math.max(...d.wos.map(r => r.weeks_of_supply)) * 1.15;
+  const gw = (W - L - R) / cats.length, bw = gw * .32, y = v => T + (H - T - B) * (1 - v / max);
+  let o = [0, 4, 8].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text class="axis" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}w</text>`).join("");
+  cats.forEach((c, i) => { ["DC", "Store"].forEach((lt, j) => { const r = d.wos.find(z => z.category === c && z.location_type === lt), x0 = L + gw * i + gw / 2 - bw + j * bw;
+      o += `<rect x="${x0}" y="${y(r.weeks_of_supply)}" width="${bw - 3}" height="${H - B - y(r.weeks_of_supply)}" fill="${j ? "var(--warn)" : "var(--accent)"}" rx="2"><title>${c} ${lt}: ${r.weeks_of_supply.toFixed(1)} weeks</title></rect>`; });
+    o += `<text class="axis" x="${L + gw * i + gw / 2}" y="${H - 18}" text-anchor="middle">${c}</text>`; });
+  o += `<text class="axis" x="${L}" y="${H - 2}"><tspan style="fill:var(--accent)">■</tspan> DCs  <tspan style="fill:var(--warn)">■</tspan> stores</text>`;
+  document.getElementById("wos").innerHTML = o; })();
+
+const inc = d.incident, dup = inc.duplicates[0];
+document.getElementById("incidentText").innerHTML = `A source audit flagged that DC1's ${dup.date} snapshot arrived <b>${dup.rows_loaded / dup.skus === 2 ? "twice" : dup.rows_loaded / dup.skus + "×"}</b> (${dup.skus} SKUs). Left in, the reconciliation between snapshots and the event stream shows the damage: on-hand doubles on ${inc.recon_without_dedupe[0].date} and "falls" back on ${inc.recon_without_dedupe[1].date}, two days of fake movement no event explains.`;
+document.getElementById("incidentStats").innerHTML = [[inc.recon_without_dedupe.reduce((s, r) => s + r.mismatches, 0), "unexplained changes without the fix"], [inc.recon_with_dedupe, "after deduplicating the feed"],
+  [(inc.events_raw - inc.events_total).toLocaleString(), `duplicate events dropped from ${inc.events_raw.toLocaleString()}`]].map(([b, s]) => `<div><b>${b}</b><span class="soft">${s}</span></div>`).join("");
+
+(() => { const layers = ["staging", "core", "marts", "audit"], W = 520, H = 360, colW = W / 4;
+  const by = Object.fromEntries(layers.map(l => [l, d.lineage.filter(n => n.layer === l).map(n => n.name).sort()]));
+  const pos = {}; layers.forEach((l, i) => by[l].forEach((n, j) => pos[n] = [i * colW + 6, 26 + j * ((H - 30) / Math.max(by[l].length, 1))]));
+  let o = layers.map((l, i) => `<text class="axis" x="${i * colW + 6}" y="12" style="font-weight:700">${l.toUpperCase()}</text>`).join("");
+  d.lineage.forEach(n => n.depends_on.forEach(p => { if (pos[p] && pos[n.name]) { const [x1, y1] = pos[p], [x2, y2] = pos[n.name];
+    o += `<path d="M${x1 + colW - 14},${y1 + 6} C${x1 + colW + 10},${y1 + 6} ${x2 - 20},${y2 + 6} ${x2},${y2 + 6}" fill="none" stroke="var(--rule)"/>`; } }));
+  Object.entries(pos).forEach(([n, [x, y]]) => o += `<text x="${x}" y="${y + 10}" style="font:500 9.5px 'JetBrains Mono',monospace;fill:var(--ink)">${n.replace(/^(stg_|dim_|fct_|mart_|audit_|recon_)/, m => m)}</text>`);
+  document.getElementById("lineage").innerHTML = o; })();
+
+const tp = d.tests.filter(t => t.status === "pass").length, tw = d.tests.filter(t => t.status === "warn").length, tf = d.tests.filter(t => t.status === "fail" || t.status === "error").length;
+document.getElementById("testSummary").textContent = `${tp} passed, ${tw} warning${tw === 1 ? "" : "s"}, ${tf} failed, out of ${d.tests.length} tests.`;
+document.getElementById("tests").innerHTML = d.tests.map(t => `<div><span class="dot" style="background:${t.status === "pass" ? "var(--good)" : t.status === "warn" ? "var(--warn)" : "var(--bad)"}"></span><span class="mono">${esc(t.name)}</span></div>`).join("");
+document.getElementById("catalog").innerHTML = `<thead><tr><th>Metric</th><th style="text-align:left">Definition</th><th style="text-align:left">Source model</th><th style="text-align:left">Owner</th><th>Value</th></tr></thead><tbody>` +
+  d.metrics.map(m => `<tr><td><b>${esc(m.label)}</b></td><td style="text-align:left;white-space:normal">${esc(m.definition)}</td><td style="text-align:left" class="mono">${esc(m.model)}</td><td style="text-align:left">${esc(m.owner)}</td><td>${fmt(m, d.certified[m.name])}</td></tr>`).join("") + "</tbody>";
+</script>
+</body>
+</html>

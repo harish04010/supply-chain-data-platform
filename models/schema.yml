@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: dim_sku
+    description: One row per SKU with category, vendor and prices.
+    columns:
+      - name: sku
+        tests: [unique, not_null]
+      - name: vendor_id
+        tests: [{relationships: {to: ref('dim_vendor'), field: vendor_id}}]
+  - name: dim_vendor
+    columns: [{name: vendor_id, tests: [unique, not_null]}]
+  - name: dim_location
+    columns:
+      - {name: location_id, tests: [unique, not_null]}
+      - {name: location_type, tests: [{accepted_values: {values: ['DC', 'Store']}}]}
+  - name: fct_po_lines
+    description: PO lines joined to ASNs and DC receipts; on-time, in-full and OTIF flags.
+    columns:
+      - {name: po_number, tests: [unique, not_null]}
+      - {name: vendor_id, tests: [{relationships: {to: ref('dim_vendor'), field: vendor_id}}]}
+      - {name: sku, tests: [{relationships: {to: ref('dim_sku'), field: sku}}]}
+  - name: fct_inventory_daily
+    description: End-of-day on hand by location and SKU, one row per key after deduplicating the feed.
+  - name: stg_inventory_events
+    columns:
+      - {name: event_id, tests: [unique, not_null]}
+      - {name: event_type, tests: [{accepted_values: {values: ['SALE', 'RECEIPT', 'SHIP_OUT', 'STORE_RECEIPT', 'ADJUSTMENT']}}]}
+  - name: mart_vendor_scorecard
+    columns: [{name: vendor_id, tests: [unique, not_null]}]
+  - name: audit_snapshot_duplicates
+    description: Rows the snapshot feed delivered more than once. Non-empty means an upstream load problem.
